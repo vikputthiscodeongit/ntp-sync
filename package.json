@@ -1,7 +1,7 @@
 {
   "name": "@codebundlesbyvik/ntp-sync",
   "version": "1.0.0",
-  "description": "Network Time Protocol synchronization library.",
+  "description": "A basic Network Time Protocol synchronization library.",
   "keywords": [
     "ntp",
     "sync",
