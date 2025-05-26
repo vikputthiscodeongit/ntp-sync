@@ -26,7 +26,12 @@ interface DefaultOptions {
 }
 
 interface Options extends Partial<DefaultOptions> {
-    t1EndpointUrl: string;
+    t1EndpointUrl?: string;
+    t1Endpoint?: {
+        url: RequestInfo | URL;
+        fetchOptions?: RequestInit;
+        timeoutDuration?: number;
+    };
     t1CalcFn: (httpRes: Response) => Promise<number | null>;
     t2CalcFn?: (httpResHeaders: Headers) => number | null;
 }
@@ -37,7 +42,7 @@ const DEFAULT_INSTANCE_OPTIONS: DefaultOptions = {
 };
 
 class Ntp {
-    t1EndpointUrl: string;
+    t1FetchOptions: [RequestInfo | URL, RequestInit?, number?];
     t1CalcFn: (httpResponse: Response) => Promise<number | null>;
     t2CalcFn: ((httpResponseHeaders: Headers) => number | null) | null;
     maxSyncAttempts: number;
@@ -49,7 +54,27 @@ class Ntp {
             ...options,
         };
 
-        this.t1EndpointUrl = mergedOptions.t1EndpointUrl;
+        if (mergedOptions.t1EndpointUrl && mergedOptions.t1Endpoint) {
+            console.warn(
+                "t1EndpointUrl and t1Endpoint.url are both provided. t1Endpoint.url will take preference.",
+            );
+        }
+
+        const t1EndpointUrl = mergedOptions.t1Endpoint
+            ? mergedOptions.t1Endpoint.url
+            : mergedOptions.t1EndpointUrl;
+
+        if (!t1EndpointUrl) {
+            throw new Error(
+                "t1 endpoint URL must be provided, either as t1EndpointUrl or t1Endpoint.url.",
+            );
+        }
+
+        this.t1FetchOptions = [
+            t1EndpointUrl,
+            mergedOptions.t1Endpoint?.fetchOptions,
+            mergedOptions.t1Endpoint?.timeoutDuration,
+        ];
         this.t1CalcFn = mergedOptions.t1CalcFn;
         this.t2CalcFn = mergedOptions.t2CalcFn || null;
         this.maxSyncAttempts = mergedOptions.maxSyncAttempts;
@@ -67,7 +92,7 @@ class Ntp {
             const t0 = new Date().valueOf();
             console.debug(`generateData - t0:`, t0);
 
-            const response = await fetchWithTimeout(this.t1EndpointUrl);
+            const response = await fetchWithTimeout(...this.t1FetchOptions);
 
             if (!response.ok) {
                 throw new Error(`t1 data fetch failed with HTTP status code ${response.status}.`);
