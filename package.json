@@ -29,11 +29,10 @@
   },
   "type": "module",
   "scripts": {
-    "compile-js": "tsc",
-    "lint": "eslint",
     "lint-fix": "eslint --fix",
-    "build": "cross-env NODE_ENV=production npm run lint-fix && rimraf dist && npm run compile-js && npm run minify",
-    "minify": "terser dist/index.js --output dist/index.js --ecma 2021 --compress passes=2"
+    "compile": "tsc",
+    "minify": "terser dist/index.js --output dist/index.js --compress drop_console=[debug,log,info],ecma=2022,module=true,passes=2",
+    "build": "cross-env NODE_ENV=production npm run lint-fix && rimraf dist && npm run compile && npm run minify"
   },
   "dependencies": {
     "@codebundlesbyvik/js-helpers": "^2.1.3"
