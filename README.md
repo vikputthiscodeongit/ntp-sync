@@ -31,7 +31,7 @@ npm install @codebundlesbyvik/ntp-sync
 If you're not using a module bundler then either:
 
 * [Download the latest release from the GitHub releases page](https://github.com/vikputthiscodeongit/ntp-sync/releases/latest), or
-* [Load the JavaScript](https://cdn.jsdelivr.net/npm/@codebundlesbyvik/ntp-sync@1.0.0) via the jsdelivr CDN.
+* [Load the JavaScript](https://cdn.jsdelivr.net/npm/@codebundlesbyvik/ntp-sync@1.1.0/dist/index.js) via the jsdelivr CDN.
 
 And in your HTML file import the JavaScript as a module.
 
