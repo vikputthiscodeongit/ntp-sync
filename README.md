@@ -21,7 +21,7 @@ A basic Network Time Protocol synchronization library.
 
 ## Usage
 
-If you're not familiar with NTP yet then I highly recommend to [read up on what the values mean](https://en.wikipedia.org/wiki/Network_Time_Protocol#Clock_synchronization_algorithm) first.
+If you're not familiar with NTP yet then you'll probably want to [read up on what the values mean](https://en.wikipedia.org/wiki/Network_Time_Protocol#Clock_synchronization_algorithm) first.
 
 ``` shell
 # Install package from npm
@@ -33,7 +33,7 @@ If you're not using a module bundler then either:
 * [Download the latest release from the GitHub releases page](https://github.com/vikputthiscodeongit/ntp-sync/releases/latest), or
 * [Load the JavaScript](https://cdn.jsdelivr.net/npm/@codebundlesbyvik/ntp-sync@1.0.0) via the jsdelivr CDN.
 
-In your HTML file, import the JavaScript as a module.
+And in your HTML file import the JavaScript as a module.
 
 For the example below I assume the main JavaScript file is processed by a module bundler.
 
@@ -107,9 +107,9 @@ Returns an object containing round-trip delay and client offset.
 
 ### `.sync()`
 
-Calls `.generateData()` multiple times and returns an average of these values alongside a corrected Unix timestamp.
+Calls `.generateData()` at most `maxSyncAttempts` times, calculates an average of each value and returns them alongside a corrected Unix timestamp.
 
-A `convertUnixTimeFormatToMs()` helper function is also exported, which can be used to convert any format Unix timestamp dated after September 9th 2001 to one with millisecond precision.
+A helper function `convertUnixTimeFormatToMs()` is also available and can be used to convert any format Unix timestamp dated after September 9th 2001 to one with millisecond precision.
 
 <br>
 
