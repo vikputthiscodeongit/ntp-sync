@@ -82,9 +82,7 @@ const values = await this.ntp.sync();
 
 ## Compatibility
 
-Requires an ECMAScript 2018 (ES9) compatible browser as the latest JavaScript feature used is the spread syntax.
-
-Practically speaking, all browsers released in 2019 and onwards are fully supported.
+Requires an ECMAScript 2022 (ES13) compatible environment. Practically speaking, all browsers released in 2021 and onwards are fully supported.
 
 <br>
 
