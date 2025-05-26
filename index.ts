@@ -95,7 +95,7 @@ class Ntp {
             const response = await fetchWithTimeout(...this.t1FetchOptions);
 
             if (!response.ok) {
-                throw new Error(`t1 data fetch failed with HTTP status code ${response.status}.`);
+                throw new Error(`t1 data fetch failed.`);
             }
 
             const t1 = await this.t1CalcFn(response);
@@ -125,7 +125,7 @@ class Ntp {
             console.debug(`generateData - t3:`, t3);
 
             if ([t0, t1, t2, t3].some((time) => Number.isNaN(time))) {
-                throw new Error("Some of the generated time values aren't of type `number`.");
+                throw new Error("Some of the time values aren't of type `number`.");
             }
 
             const roundTripDelay = t3 - t0 - (t2 - t1);
@@ -136,7 +136,7 @@ class Ntp {
         } catch (error) {
             throw error instanceof Error
                 ? error
-                : new Error("Unknown error during NTP data generation!");
+                : new Error("Unknown error during NTP data generation.");
         }
     }
 
@@ -169,7 +169,7 @@ class Ntp {
 
                     if (iteration < this.maxSyncAttempts - 1) {
                         console.debug(
-                            `sync: Retrying ${this.maxSyncAttempts - 1 - iteration} more time(s)!`,
+                            `sync: Retrying ${this.maxSyncAttempts - 1 - iteration} more time(s).`,
                         );
                     }
                 }
@@ -196,7 +196,7 @@ class Ntp {
 
             return values;
         } catch (error) {
-            throw error instanceof Error ? error : new Error("Unknown error during NTP sync!");
+            throw error instanceof Error ? error : new Error("Unknown error during NTP sync.");
         }
     }
 }
