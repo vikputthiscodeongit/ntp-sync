@@ -11,7 +11,7 @@
     "module",
     "esm"
   ],
-  "license": "MPL-2.0",
+  "license": "MIT",
   "author": "codebundlesbyvik",
   "files": [
     "dist/**/*"
