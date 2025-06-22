@@ -115,4 +115,4 @@ A helper function `convertUnixTimeFormatToMs()` is also available and can be use
 
 ## License
 
-Mozilla Public License 2.0 © 2025 [Viktor Chin-Kon-Sung](https://github.com/vikputthiscodeongit)
+MIT © 2025 [Viktor Chin-Kon-Sung](https://github.com/vikputthiscodeongit)
