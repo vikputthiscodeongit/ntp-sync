@@ -88,116 +88,102 @@ class Ntp {
     async generateData() {
         console.info("generateData: Running...");
 
-        try {
-            const t0 = new Date().valueOf();
-            console.debug(`generateData - t0:`, t0);
+        const t0 = new Date().valueOf();
+        console.debug(`generateData - t0:`, t0);
 
-            const response = await fetchWithTimeout(...this.t1FetchOptions);
+        const response = await fetchWithTimeout(...this.t1FetchOptions);
 
-            if (!response.ok) {
-                throw new Error(`t1 data fetch failed.`);
-            }
-
-            const t1 = await this.t1CalcFn(response);
-            console.debug(`generateData - t1:`, t1);
-
-            if (t1 === null) {
-                throw new Error("t1 calculation returned `null`.");
-            }
-
-            let t2 = t1;
-
-            if (this.t2CalcFn) {
-                console.debug("generateData: Using provided function for t2 calculation.");
-
-                const t2CalcFnResult = this.t2CalcFn(response.headers);
-
-                if (t2CalcFnResult !== null && t2CalcFnResult > t1) {
-                    console.debug("generateData: Using t2CalcFnResult.");
-
-                    t2 = t2CalcFnResult;
-                }
-            }
-
-            console.debug(`generateData - t2:`, t2);
-
-            const t3 = new Date().valueOf();
-            console.debug(`generateData - t3:`, t3);
-
-            if ([t0, t1, t2, t3].some((time) => Number.isNaN(time))) {
-                throw new Error("Some of the time values aren't of type `number`.");
-            }
-
-            const roundTripDelay = t3 - t0 - (t2 - t1);
-            const clientOffset = (t1 - t0 + (t2 - t3)) / 2; // client > server
-            console.debug(`generateData: RTD & CO:`, [roundTripDelay, clientOffset]);
-
-            return { roundTripDelay, clientOffset };
-        } catch (error) {
-            throw error instanceof Error
-                ? error
-                : new Error("Unknown error during NTP data generation.");
+        if (!response.ok) {
+            throw new Error(`t1 data fetch failed.`);
         }
+
+        const t1 = await this.t1CalcFn(response);
+        console.debug(`generateData - t1:`, t1);
+
+        if (t1 === null) {
+            throw new Error("t1 calculation returned `null`.");
+        }
+
+        let t2 = t1;
+
+        if (this.t2CalcFn) {
+            console.debug("generateData: Using provided function for t2 calculation.");
+
+            const t2CalcFnResult = this.t2CalcFn(response.headers);
+
+            if (t2CalcFnResult !== null && t2CalcFnResult > t1) {
+                t2 = t2CalcFnResult;
+            } else {
+                console.warn("t2 calculation with provided function failed. Using t1 as t2.");
+            }
+        }
+
+        console.debug(`generateData - t2:`, t2);
+
+        const t3 = new Date().valueOf();
+        console.debug(`generateData - t3:`, t3);
+
+        if ([t0, t1, t2, t3].some((time) => Number.isNaN(time))) {
+            throw new Error("Some of the time values aren't of type `number`.");
+        }
+
+        const roundTripDelay = t3 - t0 - (t2 - t1);
+        const clientOffset = (t1 - t0 + (t2 - t3)) / 2; // client > server
+        console.debug(`generateData: RTD & CO:`, [roundTripDelay, clientOffset]);
+
+        return { roundTripDelay, clientOffset };
     }
 
     async sync() {
         console.info("sync: Running...");
 
-        try {
-            const data = [];
+        const data = [];
 
-            for (
-                let iteration = 0, okIterations = 0;
-                iteration < this.maxSyncAttempts;
-                iteration++
-            ) {
-                console.debug(`sync - fetch loop run: ${iteration}`);
+        for (let iteration = 0, okIterations = 0; iteration < this.maxSyncAttempts; iteration++) {
+            console.debug(`sync - fetch loop run: ${iteration}`);
 
-                try {
-                    if (iteration > this.requiredOkSyncAttempts) {
-                        await wait(1000);
-                    }
+            try {
+                if (iteration > this.requiredOkSyncAttempts) {
+                    await wait(1000);
+                }
 
-                    const ntpData = await this.generateData();
-                    data.push(ntpData);
+                const ntpData = await this.generateData();
+                data.push(ntpData);
 
-                    okIterations++;
+                okIterations++;
 
-                    if (okIterations > this.requiredOkSyncAttempts) break;
-                } catch (error) {
-                    console.error(error);
+                if (okIterations > this.requiredOkSyncAttempts) break;
+            } catch (error) {
+                console.error(error);
 
-                    if (iteration < this.maxSyncAttempts - 1) {
-                        console.debug(
-                            `sync: Retrying ${this.maxSyncAttempts - 1 - iteration} more time(s).`,
-                        );
-                    }
+                if (iteration < this.maxSyncAttempts - 1) {
+                    console.debug(
+                        `sync: Retrying ${this.maxSyncAttempts - 1 - iteration} more time(s).`,
+                    );
                 }
             }
-
-            if (data.length < this.requiredOkSyncAttempts) {
-                throw new Error(
-                    `Didn't meet the required amount of ${this.requiredOkSyncAttempts} successful sync attempts within the allowed amount of ${this.maxSyncAttempts} total.`,
-                );
-            }
-
-            const roundTripDelay = getAverage(
-                filterOutliers(data.map((item) => item.roundTripDelay)),
-                "floor",
-            );
-            const clientOffset = getAverage(
-                filterOutliers(data.map((item) => item.clientOffset)),
-                "floor",
-            );
-            const correctedDate = new Date().valueOf() - clientOffset;
-
-            const values = { roundTripDelay, clientOffset, correctedDate };
-            console.debug("sync - values:", values);
-
-            return values;
-        } catch (error) {
-            throw error instanceof Error ? error : new Error("Unknown error during NTP sync.");
         }
+
+        if (data.length < this.requiredOkSyncAttempts) {
+            throw new Error(
+                `Didn't meet the required amount of successful sync attempts (${this.requiredOkSyncAttempts} out of ${this.maxSyncAttempts}).`,
+            );
+        }
+
+        const roundTripDelay = getAverage(
+            filterOutliers(data.map((item) => item.roundTripDelay)),
+            "floor",
+        );
+        const clientOffset = getAverage(
+            filterOutliers(data.map((item) => item.clientOffset)),
+            "floor",
+        );
+        const correctedDate = new Date().valueOf() - clientOffset;
+
+        const values = { roundTripDelay, clientOffset, correctedDate };
+        console.debug("sync - values:", values);
+
+        return values;
     }
 }
 
