@@ -40,7 +40,7 @@ type Options = (OptionsT1EndpointFetchUrl | OptionsT1EndpointFetchProps) & {
 };
 
 class Ntp {
-    t1FetchOptions: [RequestInfo | URL, RequestInit?, number?];
+    readonly #t1FetchOptions: [RequestInfo | URL, RequestInit?, number?];
     t1CalcFn: (httpResponse: Response) => Promise<number | null>;
     t2CalcFn: ((httpResponseHeaders: Headers) => number | null) | null;
     maxSyncAttempts: number;
@@ -51,7 +51,7 @@ class Ntp {
             options: Options,
         ): options is Exclude<Options, OptionsT1EndpointFetchUrl> => "t1Endpoint" in options;
 
-        this.t1FetchOptions = isOptionsWithT1EndpointFetchProps(options)
+        this.#t1FetchOptions = isOptionsWithT1EndpointFetchProps(options)
             ? [
                   options.t1Endpoint.url,
                   options.t1Endpoint.fetchOptions,
@@ -76,7 +76,7 @@ class Ntp {
         const t0 = new Date().valueOf();
         console.debug(`generateData - t0:`, t0);
 
-        const response = await fetchWithTimeout(...this.t1FetchOptions);
+        const response = await fetchWithTimeout(...this.#t1FetchOptions);
 
         if (!response.ok) {
             throw new Error(`t1 data fetch failed.`);
