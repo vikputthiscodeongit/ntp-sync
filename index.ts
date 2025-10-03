@@ -20,25 +20,23 @@ function filterOutliers(values: number[]) {
     return values.sort((a, b) => a - b).slice(1, values.length - 2);
 }
 
-interface DefaultOptions {
-    maxSyncAttempts: number;
-    requiredOkSyncAttempts: number;
+interface OptionsT1EndpointFetchUrl {
+    t1EndpointUrl: string;
 }
 
-interface Options extends Partial<DefaultOptions> {
-    t1EndpointUrl?: string;
-    t1Endpoint?: {
+interface OptionsT1EndpointFetchProps {
+    t1Endpoint: {
         url: RequestInfo | URL;
         fetchOptions?: RequestInit;
         timeoutDuration?: number;
     };
-    t1CalcFn: (httpRes: Response) => Promise<number | null>;
-    t2CalcFn?: (httpResHeaders: Headers) => number | null;
 }
 
-const DEFAULT_INSTANCE_OPTIONS: DefaultOptions = {
-    maxSyncAttempts: 6,
-    requiredOkSyncAttempts: 4,
+type Options = (OptionsT1EndpointFetchUrl | OptionsT1EndpointFetchProps) & {
+    t1CalcFn: (httpRes: Response) => Promise<number | null>;
+    t2CalcFn?: (httpResHeaders: Headers) => number | null;
+    maxSyncAttempts?: number;
+    requiredOkSyncAttempts?: number;
 };
 
 class Ntp {
@@ -49,36 +47,23 @@ class Ntp {
     requiredOkSyncAttempts: number;
 
     constructor(options: Options) {
-        const mergedOptions = {
-            ...DEFAULT_INSTANCE_OPTIONS,
-            ...options,
-        };
+        const isOptionsWithT1EndpointFetchProps = (
+            options: Options,
+        ): options is Exclude<Options, OptionsT1EndpointFetchUrl> => "t1Endpoint" in options;
 
-        if (mergedOptions.t1EndpointUrl && mergedOptions.t1Endpoint) {
-            console.warn(
-                "t1EndpointUrl and t1Endpoint.url are both provided. t1Endpoint.url will take preference.",
-            );
-        }
+        this.t1FetchOptions = isOptionsWithT1EndpointFetchProps(options)
+            ? [
+                  options.t1Endpoint.url,
+                  options.t1Endpoint.fetchOptions,
+                  options.t1Endpoint.timeoutDuration,
+              ]
+            : [options.t1EndpointUrl];
+        this.t1CalcFn = options.t1CalcFn;
+        this.t2CalcFn = options.t2CalcFn ?? null;
+        this.maxSyncAttempts = options.maxSyncAttempts ?? 6;
+        this.requiredOkSyncAttempts = options.requiredOkSyncAttempts ?? 4;
 
-        const t1EndpointUrl = mergedOptions.t1Endpoint
-            ? mergedOptions.t1Endpoint.url
-            : mergedOptions.t1EndpointUrl;
-
-        if (!t1EndpointUrl) {
-            throw new Error(
-                "t1 endpoint URL must be provided, either as t1EndpointUrl or t1Endpoint.url.",
-            );
-        }
-
-        this.t1FetchOptions = [
-            t1EndpointUrl,
-            mergedOptions.t1Endpoint?.fetchOptions,
-            mergedOptions.t1Endpoint?.timeoutDuration,
-        ];
-        this.t1CalcFn = mergedOptions.t1CalcFn;
-        this.t2CalcFn = mergedOptions.t2CalcFn || null;
-        this.maxSyncAttempts = mergedOptions.maxSyncAttempts;
-        this.requiredOkSyncAttempts = mergedOptions.requiredOkSyncAttempts;
+        return;
     }
 
     // t0 is the client's timestamp at the request packet transmission
