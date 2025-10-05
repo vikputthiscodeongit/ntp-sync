@@ -33,16 +33,16 @@ interface OptionsT1EndpointFetchProps {
 }
 
 type Options = (OptionsT1EndpointFetchUrl | OptionsT1EndpointFetchProps) & {
-    t1CalcFn: (httpRes: Response) => Promise<number | null>;
-    t2CalcFn?: (httpResHeaders: Headers) => number | null;
+    t1CalcFn: (httpResp: Response) => Promise<number | null>;
+    t2CalcFn?: (httpRespHeaders: Headers) => number | null;
     maxSyncAttempts?: number;
     requiredOkSyncAttempts?: number;
 };
 
 class Ntp {
     readonly #t1FetchOptions: [RequestInfo | URL, RequestInit?, number?];
-    t1CalcFn: (httpResponse: Response) => Promise<number | null>;
-    t2CalcFn: ((httpResponseHeaders: Headers) => number | null) | null;
+    t1CalcFn: (httpResp: Response) => Promise<number | null>;
+    t2CalcFn: ((httpRespHeaders: Headers) => number | null) | null;
     maxSyncAttempts: number;
     requiredOkSyncAttempts: number;
 
