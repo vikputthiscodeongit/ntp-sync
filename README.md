@@ -50,16 +50,12 @@ const ntp = new Ntp({
         // Header value example: t=1747777363406069 D=110
         const header = resHeaders.get("Response-Timing");
 
-        if (!header) {
-            return null;
-        }
+        if (!header) return null;
 
         const reqReceivedTime = /\bt=([0-9]+)\b/.exec(header);
         const reqProcessingTime = /\bD=([0-9]+)\b/.exec(header);
 
-        if (!reqReceivedTime || !reqProcessingTime) {
-            return null;
-        }
+        if (!reqReceivedTime || !reqProcessingTime) return null;
 
         const resTransmitTime =
             Number.parseInt(reqReceivedTime[1]) + Number.parseInt(reqProcessingTime[1]);
