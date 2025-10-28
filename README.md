@@ -28,10 +28,9 @@ If you're not familiar with NTP yet then you'll probably want to [read up on wha
 npm install @codebundlesbyvik/ntp-sync
 ```
 
-If you're not using a module bundler then either:
-
-* [Download the latest release from the GitHub releases page](https://github.com/vikputthiscodeongit/ntp-sync/releases/latest), or
-* [Load the JavaScript](https://cdn.jsdelivr.net/npm/@codebundlesbyvik/ntp-sync@1.1.0/dist/index.js) via the jsdelivr CDN.
+If you're not using a module bundler then:
+* Download the latest `@codebundlesbyvik/js-helpers` release [from GitHub](https://github.com/vikputthiscodeongit/js-helpers/releases/latest) or load it directly [via jsdelivr](https://cdn.jsdelivr.net/npm/@codebundlesbyvik/js-helpers@2.1.5/dist/index.js).
+* Download the latest `@codebundlesbyvik/ntp-sync` release [from GitHub](https://github.com/vikputthiscodeongit/ntp-sync/releases/latest) or load it directly [via jsdelivr](https://cdn.jsdelivr.net/npm/@codebundlesbyvik/ntp-sync@1.1.1/dist/index.js).
 
 For the example below I assume the main JavaScript file is processed by a module bundler.
 
@@ -40,10 +39,15 @@ import Ntp, { convertUnixTimeFormatToMs } from "@codebundlesbyvik/ntp-sync";
 
 const ntp = new Ntp({
     t1EndpointUrl: "./api/ntp/get-server-time.php",
-    t1CalcFn: async function t1CalcFn(response: Response) {
-        const data = (await response.json()) as { req_received_time: number };
+    t1CalcFn: async function (response: Response) {
+        const fetchedData = (await response.json()) as unknown;
 
-        return convertUnixTimeFormatToMs(data.req_received_time);
+        const isValidData = (data: unknown): data is { received_time: number } =>
+            typeof data === "object" && data !== null && "received_time" in data;
+
+        return isValidData(fetchedData)
+            ? convertUnixTimeFormatToMs(fetchedData.received_time)
+            : null;
     },
     // Providing a t2CalcFn for greater accuracy is recommended but not required.
     t2CalcFn: function (responseHeaders: Headers) {
