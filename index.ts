@@ -33,16 +33,16 @@ interface OptionsT1EndpointFetchProps {
 }
 
 type Options = (OptionsT1EndpointFetchUrl | OptionsT1EndpointFetchProps) & {
-    t1CalcFn: (httpResp: Response) => Promise<number | null>;
-    t2CalcFn?: (httpRespHeaders: Headers) => number | null;
+    t1CalcFn: (response: Response) => Promise<number | null>;
+    t2CalcFn?: (responseHeaders: Headers) => number | null;
     maxSyncAttempts?: number;
     requiredOkSyncAttempts?: number;
 };
 
 class Ntp {
     readonly #t1FetchOptions: [RequestInfo | URL, RequestInit?, number?];
-    t1CalcFn: (httpResp: Response) => Promise<number | null>;
-    t2CalcFn: ((httpRespHeaders: Headers) => number | null) | null;
+    t1CalcFn: (response: Response) => Promise<number | null>;
+    t2CalcFn: ((responseHeaders: Headers) => number | null) | null;
     maxSyncAttempts: number;
     requiredOkSyncAttempts: number;
 
@@ -99,7 +99,7 @@ class Ntp {
             if (t2CalcFnResult !== null && t2CalcFnResult > t1) {
                 t2 = t2CalcFnResult;
             } else {
-                console.warn("t2 calculation with provided function failed. Using t1 as t2.");
+                console.warn("t2 calculation failed. Using t1 as t2.");
             }
         }
 
@@ -109,7 +109,7 @@ class Ntp {
         console.debug(`generateData - t3:`, t3);
 
         if ([t0, t1, t2, t3].some((time) => Number.isNaN(time))) {
-            throw new Error("Some of the time values aren't of type `number`.");
+            throw new Error("One or more time values are invalid.");
         }
 
         const roundTripDelay = t3 - t0 - (t2 - t1);
