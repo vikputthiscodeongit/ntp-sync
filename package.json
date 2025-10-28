@@ -32,7 +32,7 @@
     "lint-fix": "eslint --fix",
     "compile": "tsc",
     "minify": "terser dist/index.js --output dist/index.js --compress drop_console=[debug,log,info],ecma=2022,module=true,passes=2",
-    "build": "cross-env NODE_ENV=production npm run lint-fix && rimraf dist && npm run compile && npm run minify"
+    "build": "npm run lint-fix && rimraf dist && cross-env NODE_ENV=production npm run compile && npm run minify"
   },
   "dependencies": {
     "@codebundlesbyvik/js-helpers": "^2.1.3"
