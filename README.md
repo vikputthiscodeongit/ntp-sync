@@ -46,9 +46,9 @@ const ntp = new Ntp({
         return convertUnixTimeFormatToMs(data.req_received_time);
     },
     // Providing a t2CalcFn for greater accuracy is recommended but not required.
-    t2CalcFn: function t2CalcFn(resHeaders: Headers) {
+    t2CalcFn: function (responseHeaders: Headers) {
         // Header value example: t=1747777363406069 D=110
-        const header = resHeaders.get("Response-Timing");
+        const header = responseHeaders.get("Response-Timing");
 
         if (!header) return null;
 
@@ -57,10 +57,10 @@ const ntp = new Ntp({
 
         if (!reqReceivedTime || !reqProcessingTime) return null;
 
-        const resTransmitTime =
+        const respTransmitTime =
             Number.parseInt(reqReceivedTime[1]) + Number.parseInt(reqProcessingTime[1]);
 
-        return convertUnixTimeFormatToMs(resTransmitTime);
+        return convertUnixTimeFormatToMs(respTransmitTime);
     },
 });
 
@@ -86,8 +86,8 @@ Requires an ECMAScript 2022 (ES13) compatible environment. Practically speaking,
 | :-------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------- | :------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `t1EndpointUrl` <br> **Required if `t1Endpoint` not provided.** | `string`                                                                                                                                                                                 | -           | URL of the endpoint to retrieve t1 from.                                                                                                                 |
 | `t1Endpoint` <br> **Required if `t1EndpointUrl` not provided.** | [@codebundlesbyvik/js-helpers `fetchWithTimeout` parameters](https://github.com/vikputthiscodeongit/js-helpers?tab=readme-ov-file#fetchwithtimeoutresource-fetchoptions-timeoutduration) | -           | Parameters for the fetcher used to retrieve t1.                                                                                                          |
-| `t1CalcFn` <br> **Required**                                    | `(httpResp: Response) => Promise<number \| null>`                                                                                                                                        | -           | Function used to process t1.                                                                                                                             |
-| `t2CalcFn`                                                      | `(httpRespHeaders: Headers) => number \| null`                                                                                                                                           | `undefined` | Function used for calculating t2. Recommended for greater precision. If not provided then t1 = t2.                                                       |
+| `t1CalcFn` <br> **Required**                                    | `(response: Response) => Promise<number \| null>`                                                                                                                                        | -           | Function used to process t1.                                                                                                                             |
+| `t2CalcFn`                                                      | `(responseHeaders: Headers) => number \| null`                                                                                                                                           | `undefined` | Function used for calculating t2. Recommended for greater precision. If not provided then t1 = t2.                                                       |
 | `maxSyncAttempts`                                               | `number`                                                                                                                                                                                 | `6`         | Maximum amount of t1 fetch requests when `.sync()` is called (i.e. the amount of times `.generateData()` is called).                                     |
 | `requiredOkSyncAttempts`                                        | `number`                                                                                                                                                                                 | `4`         | Required amount of successful t1 fetch requests per `.sync()` call (i.e. the amount of `.generateData()` calls that must return a HTTP 200 status code). |
 
