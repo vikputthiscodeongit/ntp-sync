@@ -1,22 +1,24 @@
 declare function convertUnixTimeFormatToMs(time: number): number | null;
-interface DefaultOptions {
-    maxSyncAttempts: number;
-    requiredOkSyncAttempts: number;
+interface OptionsT1EndpointFetchUrl {
+    t1EndpointUrl: string;
 }
-interface Options extends Partial<DefaultOptions> {
-    t1EndpointUrl?: string;
-    t1Endpoint?: {
+interface OptionsT1EndpointFetchProps {
+    t1Endpoint: {
         url: RequestInfo | URL;
         fetchOptions?: RequestInit;
         timeoutDuration?: number;
     };
-    t1CalcFn: (httpRes: Response) => Promise<number | null>;
-    t2CalcFn?: (httpResHeaders: Headers) => number | null;
 }
+type Options = (OptionsT1EndpointFetchUrl | OptionsT1EndpointFetchProps) & {
+    t1CalcFn: (response: Response) => Promise<number | null>;
+    t2CalcFn?: (responseHeaders: Headers) => number | null;
+    maxSyncAttempts?: number;
+    requiredOkSyncAttempts?: number;
+};
 declare class Ntp {
-    t1FetchOptions: [RequestInfo | URL, RequestInit?, number?];
-    t1CalcFn: (httpResponse: Response) => Promise<number | null>;
-    t2CalcFn: ((httpResponseHeaders: Headers) => number | null) | null;
+    #private;
+    t1CalcFn: (response: Response) => Promise<number | null>;
+    t2CalcFn: ((responseHeaders: Headers) => number | null) | null;
     maxSyncAttempts: number;
     requiredOkSyncAttempts: number;
     constructor(options: Options);
