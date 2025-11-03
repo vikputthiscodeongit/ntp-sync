@@ -96,7 +96,7 @@ class Ntp {
 
             const t2CalcFnResult = this.t2CalcFn(response.headers);
 
-            if (t2CalcFnResult !== null && t2CalcFnResult > t1) {
+            if (t2CalcFnResult !== null && t2CalcFnResult >= t1) {
                 t2 = t2CalcFnResult;
             } else {
                 console.warn("t2 calculation failed. Using t1 as t2.");
