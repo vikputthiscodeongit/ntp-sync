@@ -163,7 +163,7 @@ class Ntp {
             filterOutliers(data.map((item) => item.clientOffset)),
             "floor",
         );
-        const correctedDate = new Date().valueOf() - clientOffset;
+        const correctedDate = Math.round(new Date().valueOf() + clientOffset);
 
         const values = { roundTripDelay, clientOffset, correctedDate };
         console.debug("sync - values:", values);
