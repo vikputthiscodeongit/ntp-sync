@@ -35,7 +35,7 @@
     "build": "npm run lint-fix && rimraf dist && cross-env NODE_ENV=production npm run compile && npm run minify"
   },
   "dependencies": {
-    "@codebundlesbyvik/js-helpers": "^2.1.5"
+    "@codebundlesbyvik/js-helpers": "^2.2.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.0",

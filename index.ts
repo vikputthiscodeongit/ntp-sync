@@ -157,11 +157,11 @@ class Ntp {
 
         const roundTripDelay = getAverage(
             filterOutliers(data.map((item) => item.roundTripDelay)),
-            "floor",
+            "nearest",
         );
         const clientOffset = getAverage(
             filterOutliers(data.map((item) => item.clientOffset)),
-            "floor",
+            "nearest",
         );
         const correctedDate = Math.round(new Date().valueOf() + clientOffset);
 
