@@ -51,7 +51,9 @@ const ntp = new Ntp({
     },
     // Providing a t2CalcFn for greater accuracy is recommended but not required.
     t2CalcFn: function (responseHeaders: Headers) {
-        // Header value example: t=1747777363406069 D=110
+        // Apache header with timestamp `t` for when the request was received
+        // and time it took to begin serving the requestHeader as `D`.
+        // Value example: t=1747777363406069 D=110
         const header = responseHeaders.get("Response-Timing");
 
         if (!header) return null;
