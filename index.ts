@@ -113,8 +113,7 @@ class Ntp {
         }
 
         const roundTripDelay = t3 - t0 - (t2 - t1);
-        const clientOffset = (t1 - t0 + (t2 - t3)) / 2; // client > server
-        console.debug(`generateData: RTD & CO:`, [roundTripDelay, clientOffset]);
+        const clientOffset = (t1 - t0 + (t2 - t3)) / 2; // < 0 when client > server
 
         return { roundTripDelay, clientOffset };
     }
